@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<!--
+Copyright (c) 2020 Rachel Ringe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+-->
+<html>
+    <head>
+        <!--        Import Bootstrap -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.css">
+        <style>
+
+            #rqtable{
+                width: 20%;  
+            }
+
+            td
+            {
+                height:30px;
+                width:35px;
+                text-align: center;
+            }
+
+
+            .equ{
+                padding: 0px 0px 8px 32px;
+            }
+            /*Background colors for each process for information table */
+            #P1{
+                background-color: #eb3b5a;
+            }
+            #P2{
+                background-color: #fa8231;
+            }
+            #P3{
+                background-color: #f7b731;
+            }
+            #P4{
+                background-color: #20bf6b;
+            }
+            #P5{
+                background-color: #2d98da;
+            }
+            #P6{
+                background-color: #3867d6;
+            }
+            #P7{
+                background-color: #8854d0;
+            }
+            #P8{
+                background-color: #dd65c8;
+            }
+            #P9{
+                background-color: #a5b1c2;
+            }
+            #P10{
+                background-color: #4b6584;
+            }
+            /* Diagram container*/
+            .diagramm {
+                width: 70%;
+                float: left;
+            }
+            /* ReadyQueue container*/
+            .rqdiv {
+                padding-left: 20px;
+                width: 15%;
+                float: left;
+            }
+            /* Info container*/
+            .infodiv {
+                padding-left: 20px;
+                width: 15%;
+                float: left;
+            }
+            /* Current step container*/
+            .currentStep {
+                padding-left: 20px;
+                width: 20%;
+                float: left;
+            }
+            /* Button container*/
+            .buttons {
+                width: 70%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                float: left;
+            }
+
+            .wrapper {
+                width: 95%;
+                overflow: hidden;
+            }
+            /*  Formating of various input elements */
+            .custom-select.custom-sel {
+                width: 30%;
+                color: #6c757d;
+            }
+
+            .input-group-text.custom-text {
+                background-color:#6c757d; 
+                color: #f1f1f1;
+            }
+
+            .form-control:focus {
+                border-color: #6c757d;
+                box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 0, 0.6);
+            }
+
+            .custom-select:focus {
+                border-color: #6c757d;
+                box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(0, 0, 0, 0.6);
+            }
+
+            /* Menu formatting */
+            .sidemenu {
+                height: 100%;
+                width: 0; /* Hides menu when closed */
+                position: fixed;
+                z-index: 1;
+                top: 0;
+                left: 0;
+                background-color: #f1f1f1;
+                overflow-x: hidden; /* Hides menu when closed */
+                padding-top: 50px;
+                transition: 0.5s;
+            }
+
+            /*            Formating of various forms and input elements */
+            .form-inline {
+                color: #6c757d;
+            }
+
+            .form-group {
+                color: #6c757d;
+                padding: 0px 0px 8px 32px;
+            }
+
+            .form-check {
+                color: #6c757d;
+                padding: 0px 0px 8px 32px;
+            }
+
+            .input-group {
+                width: 80%;
+                color: #6c757d;
+            }
+
+            .menuthing {
+                padding: 0px 0px 8px 32px;
+            }
+
+            /* Position and style the close button (top right corner) */
+            .sidemenu .closebtn {
+                color: #6c757d;
+                position: absolute;
+                top: 0;
+                right: 25px;
+                font-size: 36px;
+                margin-left: 50px;
+            }
+
+            /* Formatting of general error message text */
+            .val {
+                color: darkred;
+                font-size: 12px;
+            }
+            /* Formatting of error message text for equation input */
+            .equval {
+                color: darkred;
+                font-size: 12px;
+                padding: 0px 0px 8px 32px;
+            }
+
+            /* Formatting of text for info disclaimer */
+            .disclaimer {
+                font-size: 12px;
+                color: #6c757d;
+                width: 90%;
+            }
+            /* Formatting of text for custom-info*/
+            .info {
+                color: darkgreen;
+                font-size: 12px;
+                width: 90%;
+            }
+
+            #main {
+                padding-left: 5%;
+                padding-top: 2%;
+                padding-bottom: 10%;
+            }
+        </style>
+        <meta charset="utf-8"/>
+        <title>CPU Scheduling Simulator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!--        import chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+        <!--        import math.js -->
+        <script src="https://pagecdn.io/lib/mathjs/7.1.0/math.js"></script>
+        <script>
+            //Open menu
+            function openMenu() {
+                document.getElementById("options").style.width = "60%";
+            }
+
+            //Close menu
+            function closeMenu() {
+                document.getElementById("options").style.width = "0";
+            }
+
+            //Shows input for custom priority equation and checkboxes for account-value and time slice-calculation
+            function addCustomInputs(){
+                document.getElementById("customwrapper").innerHTML ="<div class=\"form-group\"><form onsubmit=\"return false\"><div class=\"info\" id=\"custominfo\">Valid characters: ABDKLRST 0123456789 + - / * ( ) <p>A = Current Time<br>B = Base priority of process<br>D = Dynamic priority of process (starts at 0 and gets calculated again at the beginning of every step)<br>K = Account value of process (starts at 0 and gets calculated again at the beginning of every step)<br>L = Average sleep-time of process<br>R = Remaining runtime of process<br>S = Start-time of process<br>T = Runtime of process until now</p></div><div class=\"input-group\"><label for=\"equationPrio\" class=\"mr-sm-2\">Priority equation: </label><input type=\"text\" class=\"form-control form-control-sm\" id=\"equationPrio\" placeholder=\"(R/4)+5\" onchange=\"validateCustom()\"></div><div class=\"val\" id=\"prioequval\"></div><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" id=\"accountCheck\" onchange=\"showAccountInput()\"><label class=\"form-check-label\" for=\"accountCheck\">Calculate account value</label></div><div class=\"input-group equ\" id=\"accountInput\"></div><div class=\"equval\" id=\"accountval\"></div><div class=\"form-check\"><input type=\"checkbox\" class=\"form-check-input\" id=\"quantumCheck\" onchange=\"showQuantumInput()\"><label class=\"form-check-label\" for=\"quantumCheck\">Calculate dynamic time slice length</label></div><div class=\"input-group equ\" id=\"quantumInput\"></div><div class=\"equval\" id=\"quantumval\"></div></form></div>";
+            }
+
+            //Shows or disables input field for account value-equation
+            function showAccountInput(){
+                if(document.getElementById('accountCheck').checked == true){
+                    document.getElementById("accountInput").innerHTML="<label for=\"equationAccount\" class=\"mr-sm-2\">Equation: </label><input type=\"text\" class=\"form-control form-control-sm\" id=\"equationAccount\" onchange=\"validateEquation('accountval','equationAccount')\">";
+                } else {
+                    document.getElementById("accountInput").innerHTML = "";
+                }
+            }
+
+            //Shows of disables input field for time slice-equation
+            function showQuantumInput(){
+                if(document.getElementById('quantumCheck').checked == true){
+                    removeQuantum();
+                    document.getElementById("quantumInput").innerHTML="<label for=\"equationQuantum\" class=\"mr-sm-2\">Equation: </label><input type=\"text\" class=\"form-control form-control-sm\" id=\"equationQuantum\" onchange=\"validateEquation('quantumval','equationQuantum')\">";
+                } else {
+                    document.getElementById("quantumInput").innerHTML = "";
+                    addQuantum();
+                }
+            }
+
+            //Resets menu to original state and deletes inputs from fields
+            function resetMenu(){
+                document.getElementById('waitpls').innerHTML = "";
+                document.getElementById('simbutton').removeAttribute("disabled");
+                if(document.getElementById('algo').value == "Round Robin" || document.getElementById('algo').value == "Accountsystem" || (document.getElementById('algo').value == "Custom" && !document.getElementById('quantumCheck').checked)){
+                    document.getElementById('timespan').value = "";
+                }
+                document.getElementById('algo').value = "Round Robin";
+                document.getElementById('proamount').value = "";
+                refreshPro();
+                addQuantum();
+            }
+
+
+            //Refreshes menu according to chosen algorithm
+            function refreshPro(){
+                var algotype = document.getElementById('algo').value;
+                document.getElementById("psettings").innerHTML = "";
+                document.getElementById("customwrapper").innerHTML = "";
+                document.getElementById('proamount').value = "";
+                //Determines if individual process line contains input field for priority
+                if(algotype == "Accountsystem" || algotype == "Linuxscheduler" || algotype == "Custom"){
+                    document.getElementById("proamount").setAttribute("onchange", "refreshProcesses(1)"); 
+                } else {
+                    document.getElementById("proamount").setAttribute("onchange", "refreshProcesses(0)");
+                }
+                if(algotype == "Linuxscheduler" || algotype == "Shortest Remaining Job First"){
+                    removeQuantum();
+                }
+                else {
+                    addQuantum();
+                }
+                if(algotype == "Custom"){
+                    addCustomInputs();
+                }
+            }
+
+            //Shows input lines for individual processes
+            //prioo: Determines if priority field should be displayed. 0 = no priority input, 1 = priority input
+            function refreshProcesses(prioo){
+                if(validateProamo()){
+                    var htmlstring = "";
+                    var proamo = document.getElementById('proamount').value;
+                    var r;
+                    htmlstring += "<form>";
+                    for(r=1; r<=proamo; r++){
+                        htmlstring += "<div class=\"form-group col-xs-4\"><div class=\"input-group input-group-sm\" id=\"pro" + r + "\"><div class=\"input-group-prepend\"><span class=\"input-group-text custom-text\">PROCESS " + r + "</span><span class=\"input-group-text\">Total runtime: </span></div><input id=\"pro" + r + "total\" onchange=\"validateProcessTotal(" + r + ")\" type=\"text\" class=\"form-control form-control-sm\"><div class=\"input-group-prepend\"><span class=\"input-group-text\">Start: </span></div><input id=\"pro" + r + "start\" onchange=\"validateProcessStart(" + r + ")\" type=\"text\" class=\"form-control form-control-sm\">";
+                        if(prioo == 1){
+                            htmlstring += "<div class=\"input-group-prepend\"><span class=\"input-group-text\">Priority: </span></div><input id=\"pro" + r + "prio\" onchange=\"validateProcessPrio(" + r + ")\"type=\"text\" class=\"form-control form-control-sm\"></div>";
+                        }
+                        htmlstring += "</div><div class=\"equval\" id=\"pro" + r + "val\"></div></div>";
+                    }
+                    htmlstring += "</form>";
+                    document.getElementById("psettings").innerHTML = htmlstring;
+                }
+            }
+
+            //Disable timeslice input
+            function removeQuantum(){
+                document.getElementById("quantumwrapper").innerHTML = "";
+            }
+
+            //Show timeslice input
+            function addQuantum(){
+                document.getElementById("quantumwrapper").innerHTML = "<div id=\"quantumwrapper\"><form onsubmit=\"return false\"><div class=\"form-group\"><div class=\"form-inline\"><label for=\"timespan\"  class=\"mr-sm-2\">Length of time slice:</label><input type=\"text\" class=\"form-control form-control-sm mr-sm-2\" id=\"timespan\" onchange=\"validateTimespan()\"><div class=\"val\" id=\"timespanval\"></div></div></div></form></div>";
+            }
+
+
+            //Checks input in all existing input fields before calculation is started
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateAll(){
+                if(document.getElementById('algo').value == "Custom"){
+                    if(!validateCustom()){
+                        return false;
+                    }
+                }
+                if(document.getElementById('algo').value == "Round Robin" || document.getElementById('algo').value == "Accountsystem" || (document.getElementById('algo').value == "Custom" && !document.getElementById('quantumCheck').checked)){
+                    if(!validateTimespan()){
+                        return false;
+                    }
+                }
+                if(validateProamo()){
+                    var r;
+                    for(r = 1; r<=parseInt(document.getElementById('proamount').value); r++){
+                        if(!validateProcessTotal(r) || !validateProcessStart(r)){
+                            return false;
+                        }
+                        if(document.getElementById('algo').value == "Accountsystem" || document.getElementById('algo').value == "Linuxscheduler" || document.getElementById('algo').value == "Custom"){
+                            if(!validateProcessPrio(r)){
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+
+
+
+            //Checks equations for errors and shows an error message if necessary
+            //valdiv: Container for error message
+            //sourcediv: Container whose content should be checked
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateEquation(valdiv,sourcediv){
+                if(document.getElementById(sourcediv).value == ""){
+                    document.getElementById(valdiv).innerHTML = "Equation-input is empty";
+                    return false;
+                } else if(/[^DLBKRTAS0123456789/+/(/)/*//-]+/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "Equation contains invalid characters";
+                    return false;
+                }else if(/[DLBKRTAS](?=[^\*\+\-\/\)])/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "A letter must be followed by an operator";
+                    return false;
+                }else if(/[0-9](?=[^\*\+\-\/\)0-9])/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "A number must be followed by an operator or another number";
+                    return false;
+                }else if(/[\*\+\-\/](?=[^0-9DLBKRTAS])/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "An operator must be followed by a number or a letter";
+                    return false;
+                }else if(/[\*\+\-\/](?=$)/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "An operator must be followed by a number or a letter";
+                    return false;
+                }else if(!/[^\*\+\-\/\(\)]/.test(document.getElementById(sourcediv).value)){
+                    document.getElementById(valdiv).innerHTML = "Equation only contains special characters";
+                    return false;
+                }else if(document.getElementById(sourcediv).value.match(/[\(\)]/g) && (!document.getElementById(sourcediv).value.match(/[\)]/g) || !document.getElementById(sourcediv).value.match(/[\(]/g) || document.getElementById(sourcediv).value.match(/[\)]/g).length != document.getElementById(sourcediv).value.match(/[\(]/g).length)){
+                    document.getElementById(valdiv).innerHTML = "Amount of brackets does not match";
+                    return false;
+                }else if(!document.getElementById('accountCheck').checked && document.getElementById(sourcediv).value.includes('K')){
+                    document.getElementById(valdiv).innerHTML = "Account value can only be used when the account option has been activated";
+                    return false; 
+                } else if(sourcediv == "equationAccount" && document.getElementById(sourcediv).value.includes('D')){
+                    document.getElementById(valdiv).innerHTML = "Dynamic priority can not be used here";
+                    return false;
+                }
+                document.getElementById(valdiv).innerHTML = "";
+                return true;
+            }
+
+            //Checks input in all custom input fields before calculation
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateCustom(){
+                if(validateEquation("prioequval", "equationPrio")){
+                    if(document.getElementById('quantumCheck').checked){
+                        if(!validateEquation("quantumval","equationQuantum")){
+                            return false;
+                        }
+                    }
+                    if(document.getElementById('accountCheck').checked){
+                        if(!validateEquation("accountval", "equationAccount")){
+                            return false;
+                        }
+                    }
+                }
+                return true;
+
+            }
+
+            //Checks input in priority input before calculation
+            //pronum: ID of process whose input field should be checked
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateProcessPrio(pronum){
+                var namestring = "pro" + pronum + "prio";
+                var valstring = "pro" + pronum + "val";
+                if(document.getElementById('algo').value == "Linuxscheduler"){
+                    if(parseInt(document.getElementById(namestring).value)< 100 || parseInt(document.getElementById(namestring).value) > 139){
+                        document.getElementById(valstring).innerHTML="Priority needs to be between 100 and 139 for the Linux scheduler";
+                        return false;
+                    }
+                }
+                if(document.getElementById(namestring).value == ""){
+                    document.getElementById(valstring).innerHTML="Priority is empty";
+                    return false;
+                }
+                else if(!document.getElementById(namestring).value.match(/^[0-9]+$/)){
+                    document.getElementById(valstring).innerHTML="Priority contains invalid characters";
+                    return false;
+                }
+                else if(parseInt(document.getElementById(namestring).value)< 0){
+                    document.getElementById(valstring).innerHTML="Priority needs to be greater than or equal to zero";
+                    return false;
+                }
+                else{
+                    document.getElementById(valstring).innerHTML="";
+                    return true;
+                }
+            }
+
+            //Checks total runtime input field before calculation
+            //pronum: ID of process whose input should be checked
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateProcessTotal(pronum){
+                var namestring = "pro" + pronum + "total";
+                var valstring = "pro" + pronum + "val";
+                if(document.getElementById(namestring).value == ""){
+                    document.getElementById(valstring).innerHTML="Total runtime is empty";
+                    return false;
+                }
+                else if(!document.getElementById(namestring).value.match(/^[0-9]+$/)){
+                    document.getElementById(valstring).innerHTML="Total runtime contains invalid characters";
+                    return false;
+                }
+                else if(parseInt(document.getElementById(namestring).value)<= 0){
+                    document.getElementById(valstring).innerHTML="Total runtime needs to be greater than zero";
+                    return false;
+                }
+                else{
+                    document.getElementById(valstring).innerHTML="";
+                    return true;
+                }
+            }
+
+            //CHecks input in process start before calculation
+            //pronum: ID of process whose input field should be checked
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateProcessStart(pronum){
+                var namestring = "pro" + pronum + "start";
+                var valstring = "pro" + pronum + "val";
+                if(document.getElementById(namestring).value == ""){
+                    document.getElementById(valstring).innerHTML="Start is empty";
+                    return false;
+                }
+                else if(!document.getElementById(namestring).value.match(/^[0-9]+$/)){
+                    document.getElementById(valstring).innerHTML="Start contains invalid characters";
+                    return false;
+                }
+                else if(parseInt(document.getElementById(namestring).value)< 0){
+                    document.getElementById(valstring).innerHTML="Start needs to be greater than zero";
+                    return false;
+                }
+                else{
+                    document.getElementById(valstring).innerHTML="";
+                    return true;
+                }
+            }
+
+
+            //Überprüft Eingabe in Zeitscheibenlänge-Eingabefeld vor Berechnung
+            //@return true wenn Eingabe fehlerfrei ist, false wenn Eingabe Fehler enthält
+            function validateTimespan(){
+                if(document.getElementById('timespan').value == ""){
+                    document.getElementById('timespanval').innerHTML = "Eingabe ist leer";
+                    return false;
+                }
+                else if(!document.getElementById('timespan').value.match(/^[0-9]+$/)){
+                    document.getElementById('timespanval').innerHTML = "Eingabe enthält ungültige Zeichen";
+                    return false;
+                }
+                else if(parseInt(document.getElementById('timespan').value) <= 0){
+                    document.getElementById('timespanval').innerHTML = "Länge der Zeitscheibe muss größer als 0 sein";
+                    return false;
+                }
+                else{document.getElementById('timespanval').innerHTML = "";
+                     return true;}
+            }
+
+
+            //Überprüft Eingabe in Prozessanzahl-Eingabefeld vor Berechnung
+            //@return true if all inputs contain no errors, false if errors exist
+            function validateProamo(){
+                var proamo = document.getElementById('proamount').value;
+                if(proamo == ""){
+                    document.getElementById('proamountval').innerHTML = "Input is empty";
+                    document.getElementById("psettings").innerHTML = "";
+                    return false;  
+                }
+                else if(!proamo.match(/^[0-9]+$/)){
+                    document.getElementById('proamountval').innerHTML = "Input contains invalid characters";
+                    document.getElementById("psettings").innerHTML = "";
+                    return false;
+                } else if (parseInt(proamo)<=0){
+                    document.getElementById('proamountval').innerHTML = "Amount of processes can not be lesser than 1";
+                    document.getElementById("psettings").innerHTML = "";
+                    return false;
+                }
+                else if(parseInt(proamo)>10){
+                    document.getElementById('proamountval').innerHTML = "Amount of processes can not be greater than 10";
+                    document.getElementById("psettings").innerHTML = "";
+                    return false;
+                } else {
+                    document.getElementById('proamountval').innerHTML = "";
+                    return true;
+                }
+            }
+
+
+            //Fills processdata array with data
+            //numproc: Amount of processes
+            //algotype: Chosen algorithm
+            function fillProcessdata(numproc, algotype){
+                var r;
+                for(r=1; r <= numproc; r++){
+                    var newProcess = {name: 'P'+r, number: r,  start: document.getElementById('pro'+r+'start').value, totaltime: document.getElementById('pro'+r+'total').value, remainingtime: document.getElementById('pro'+r+'total').value};
+                    if(algotype == "Accountsystem" || algotype == "Linuxscheduler" || algotype == "Custom"){
+                        newProcess.currentprio = 0;
+                        newProcess.startprio = document.getElementById('pro'+r+'prio').value;
+                    }
+                    if(algotype == "Custom" || algotype == "Linuxscheduler"){
+                        newProcess.quantum = 0;
+                    }
+                    if(algotype == "Accountsystem" || algotype == "Custom"){
+                        newProcess.account = 0;
+                    }
+                    processdata.push(newProcess);
+                }
+            }
+
+            //Finds earliest start of processes
+            //@return earliest start Time
+            function findStartTime(){
+                var lowest = parseInt(processdata[0].start);
+                var r;
+                for(r = 0; r<processdata.length; r++){
+                    if(parseInt(processdata[r].start) < lowest){
+                        lowest = parseInt(processdata[r].start);
+                    }
+                }
+                return lowest;
+            }
+
+            //Converts current state of readyQueue array to HTML
+            //@return current state of readyQueue as HTML string
+            function readyQueueToHtml(rq){
+                var htmlstring = "<table class=\"table table-sm table-bordered\" id=\"rqtable\"><tr><th colspan=\"10\">ReadyQueue</th></tr><tr>";
+                var r;
+                for(r = 0; r<rq.length; r++){
+                    htmlstring += "<td id = \"" + rq[r].name + "\">" + rq[r].name + "</td>"
+                }
+                htmlstring += "</tr></table>";
+                return htmlstring;
+            }
+
+            //Converts current state of processdata array to HTML
+            //Adds relevant information for chosen algorithm
+            //Chosen process gets highlighted
+            //Ausgewählter Prozess wird hervorgehoben
+            //@return Current state of processdata array as HTML string
+            function processdataToHTML(algotype, nextnum){
+                var htmlstring = "<table class=\"table table-sm table-bordered\"><tr><th colspan=\"10\">Processdata</th></tr><tr><td>Name</td><td>Remaining Time</td>";
+                if(algotype == "Accountsystem" || algotype == "Linuxscheduler" || algotype == "Custom"){
+                    htmlstring += "<td>Priority</td>";
+                }
+                if(algotype == "Accountsystem" || (algotype == "Custom" && document.getElementById('accountCheck').checked)){
+                    htmlstring += "<td>Account</td>"
+                }
+                if(algotype == "Linuxscheduler" || (algotype == "Custom" && document.getElementById('quantumCheck').checked)){
+                    htmlstring += "<td>Time slice</td>"
+                }
+                htmlstring += "</tr>";
+                var r;
+                for(r = 0; r<processdata.length; r++){
+                    htmlstring += "<tr";
+                    if(nextnum == processdata[r].number){
+                        htmlstring += " style=\"font-weight:bold\"";
+                    }
+                    htmlstring += "><td id = \"" + processdata[r].name + "\">" + processdata[r].name + "</td><td>" + processdata[r].remainingtime + "</td>";
+                    if(algotype == "Accountsystem" || algotype == "Custom" || algotype == "Linuxscheduler"){
+                        htmlstring += "<td>" + processdata[r].currentprio + "</td>";
+                    }
+                    if(algotype == "Accountsystem" || (algotype == "Custom" && document.getElementById('accountCheck').checked)){
+                        htmlstring += "<td>" + processdata[r].account + "</td>";
+                    }
+                    if(algotype == "Linuxscheduler" || (algotype == "Custom" && document.getElementById('quantumCheck').checked)){
+                        htmlstring += "<td>" + processdata[r].quantum + "</td>";
+                    }
+                    htmlstring += "</tr>";
+                }
+                htmlstring += "</tr></table>";
+                return htmlstring;
+            }
+
+            //Returns index of process with lowest priority in readyQueue
+            //readyQueue: Array containing processes
+            //@return index of process with lowest priority in readyQueue
+            function findLowestPriority(readyQueue){
+                var lowest = parseInt(readyQueue[0].currentprio);
+                var lowestIndex = 0;
+                for(r=0; r<readyQueue.length; r++){
+                    if(parseInt(readyQueue[r].currentprio)<lowest){
+                        lowest = parseInt(readyQueue[r].currentprio);
+                        lowestIndex = r;
+                    }
+                }
+                return lowestIndex;
+            }
+
+            //Calculates bonus for linux scheduler
+            //avgsleep: Average sleep time of process
+            //@return bonus value
+            function calculateBonus(avgsleep){
+                var bonus = parseInt(avgsleep/100);
+                if(bonus > 10){
+                    bonus = 10;
+                } else if(bonus < 0){
+                    bonus = 0;
+                }
+                return bonus;
+            }
+
+            //Calculates average sleep time of a process
+            //process: process-object whose average sleep time is calculated
+            //startTime: current time
+            //@return average sleep time of process
+            function calculateAvgsleep(process, startTime){
+                var avgsleep;
+                if(steps.length == 0){
+                    avgsleep = 0;
+                } else {
+                    avgsleep = parseInt(((startTime-parseInt(process.start))-(parseInt(process.totaltime)-parseInt(process.remainingtime)))/steps.length);
+                }
+                return avgsleep
+            }
+
+            //Calculates individual length of timeslice of a process for linux scheduler
+            //process: process object whose timeslice length gets calculated
+            //@return: time slice length of process
+            function calculateQuantum(process){
+                var quantum;
+                if(parseInt(process.startprio) >= 120){
+                    quantum = (140-parseInt(process.startprio)) * 5;
+                }else if(parseInt(process.startprio) <120){
+                    quantum = (140-parseInt(process.startprio)) * 20;
+                }
+                return quantum;
+            }
+
+            //Replaces placeholder letters in formula with actual values
+            //equation: Equation that gets edited
+            //process: Process object whose values are used as input
+            //startTime: current time
+            //@return changed equation
+            function replaceGeneral(equation, process, startTime){
+                if(equation.includes('A')){
+                    equation = equation.replace('A',startTime);
+                }
+                if(equation.includes('R')){
+                    equation = equation.replace('R',process.remainingtime);
+                }
+                if(equation.includes('T')){
+                    equation = equation.replace('T',process.totaltime);
+                }
+                if(equation.includes('S')){
+                    equation = equation.replace('S',process.start);
+                }
+                if(equation.includes('B')){
+                    equation = equation.replace('B',process.startprio);
+                }
+                if(equation.includes('L')){
+                    equation = equation.replace('L',calculateAvgsleep(process), startTime);
+                }
+                if(equation.includes('D')){
+                    equation = equation.replace('D',process.currentprio);
+                }
+                if(equation.includes('K')){
+                    equation = equation.replace('K',process.account);
+                }
+                return equation;
+            }
+
+
+            //Prüft ob ein Prozess mit späterer Startzeit existiert
+            //startTime: aktueller Zeitpunkt
+            //@return true wenn später beginnender Prozess existiert, false wenn nicht
+            function checkForLaterProcess(startTime){
+                var laterStart;
+                var laterIndex;
+                for(r = 0; r<processdata.length; r++){
+                    if(parseInt(processdata[r].start) >= startTime){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            //Finds Index of process with shortest remaining runtime in readyQueue array
+            //@readyQueue: readyQueue array
+            //@return index of process with shortest remaining runtime
+            function findShortestTime(readyQueue){
+                //Find process with shortest remaining time
+                var shortest = parseInt(readyQueue[0].remainingtime);
+                var index = 0;
+                for(r = 0; r<readyQueue.length; r++){
+                    if(parseInt(readyQueue[r].remainingtime) < parseInt(shortest)){
+                        shortest = parseInt(readyQueue[r].remainingtime);
+                        index = r;
+                    }
+                }
+                return index;
+            }
+
+
+            //Returns start time of next process
+            //startTime: current Time
+            //@return Next process start
+            function findNextStart(startTime){
+                var nextStart;
+                var nextIndex;
+                var r;
+                for(r = 0; r<processdata.length; r++){
+                    if(parseInt(processdata[r].start) > parseInt(startTime)){
+                        nextStart = parseInt(processdata[r].start);
+                        nextIndex = r;
+                        break;
+                    }
+                }
+                for(r = nextIndex; r<processdata.length; r++){
+                    if(parseInt(processdata[r].start) > parseInt(startTime) && parseInt(processdata[r].start) < nextStart){
+                        nextStart = parseInt(processdata[r].start);
+                    }
+                }
+                return nextStart;
+            }
+
+
+            //Returns array that contains all processes that begin at the passed time
+            //startTime: Time at which processes in array start
+            //@return Array that contains all processes that start at startTime
+            function addProcessesStart(startTime){
+                var readyQueue = [];
+                for(r = 0; r<processdata.length; r++){
+                    if(parseInt(processdata[r].start) == startTime){
+                        readyQueue.push(processdata[r]);
+                    }
+                }
+                return readyQueue;
+            }
+
+            //Checks if process is already in readyQueue
+            //readyQueue: Array that gets checked
+            //num: Id of process that gets checked
+            //@return true: readyQueue contains process with that id, false: readyQueue does not contain process with that id
+            function containsPro(readyQueue, num){
+                var r;
+                for(r = 0; r<readyQueue.length; r++){
+                    if(readyQueue[r].number == num){
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            //Checks inputs, starts calculation of algorithm steps, draws diagram, saves relevant values in browser
+            function updateProcesses(){
+                document.getElementById('simbutton').setAttribute("disabled", true);
+                if(!validateAll()){
+                    document.getElementById('simbutton').removeAttribute("disabled");
+                    return;
+                }
+                document.getElementById('waitpls').innerHTML = "Bitte warten, Schritte der Simulation werden berechnet";
+                processdata.length = 0; //maybe clear array in different way
+                var numproc = parseInt(document.getElementById('proamount').value);
+                var algotype = document.getElementById('algo').value;
+                fillProcessdata(numproc, algotype);
+                calcZeitscheibe(algotype);
+                resizeChart(myChart);
+                localStorage.setItem('algotype', algotype);
+                localStorage.setItem('firstTime', true);
+                localStorage.setItem('processdata', JSON.stringify(processdata));
+                localStorage.setItem('steps', JSON.stringify(steps));
+                resetMenu();
+                closeMenu();
+            }
+
+            //Calculates simulation steps
+            //algo: Name of chosen algorithm as string
+            function calcZeitscheibe(algo){
+                steps.length = 0;
+                var r;
+                //Find start time of simulation
+                var startTime = parseInt(findStartTime());
+                var zeitscheibe;
+                //If Linuxscheduler has been chosen calculate time slice length for every process
+                if(algo == "Linuxscheduler"){
+                    for(r = 0; r<processdata.length; r++){
+                        processdata[r].quantum = calculateQuantum(processdata[r]);
+                    }
+                }
+                else if(algo == "Shortest Remaining Job First" || (algo == "Custom" && document.getElementById('quantumCheck').checked)){
+                    zeitscheibe = 0;
+                } else {
+                    zeitscheibe = parseInt(document.getElementById('timespan').value);
+                }
+                //Add all processes to readyQueue that start at startTime
+                var readyQueue = addProcessesStart(startTime);
+                //Add all processes that start at determined start time to ready queue
+                var processesLeft = processdata.length;
+                while(processesLeft != 0){
+                    var rqinfo = readyQueueToHtml(readyQueue);
+                    var otherinfo;
+                    var next;
+                    if (algo == "Round Robin"){
+                        //Remove first object from readyQueue
+                        next = readyQueue.shift();
+                        otherinfo = processdataToHTML(algo, next.number);
+                    } else if(algo == "Accountsystem"){
+                        //Calculate priority for every process
+                        for(r=0; r<readyQueue.length; r++){
+                            var account = parseInt(readyQueue[r].account);
+                            account = parseInt(account/2);
+                            readyQueue[r].currentprio = account + parseInt(readyQueue[r].startprio);
+                            readyQueue[r].account = account;
+                            processdata[parseInt(readyQueue[r].number-1)]= readyQueue[r];
+                        }
+                        //Find process with lowest priority
+                        var lowestIndex = findLowestPriority(readyQueue);
+                        next = readyQueue[parseInt(lowestIndex)];
+                        otherinfo = processdataToHTML(algo, next.number);
+                        //Remove next process from readyQueue
+                        readyQueue.splice(parseInt(lowestIndex),1);
+                        //Refresh account value
+                        next.account += parseInt(zeitscheibe);
+                    }
+                    else if(algo == "Shortest Remaining Job First"){
+                        //Find process with shortest remaining runtime
+                        var shortestIndex = findShortestTime(readyQueue);
+                        next = readyQueue[parseInt(shortestIndex)];
+                        otherinfo = processdataToHTML(algo, next.number);
+                        //If processes remain that haven't started yet, the time slice ends at start of next process. If not, the process will run till it is done
+                        if(processesLeft == readyQueue.length){
+                            zeitscheibe = parseInt(next.remainingtime);
+                        }
+                        else {
+                            zeitscheibe = parseInt(findNextStart(startTime)-startTime);
+                        }
+                        //Remove next process from readyQueue
+                        readyQueue.splice(parseInt(shortestIndex),1);
+                    }
+                    else if(algo == "Linuxscheduler"){
+                        //Calculate current priority for all processes
+                        for(r=0; r<readyQueue.length; r++){
+                            var avgsleep = calculateAvgsleep(readyQueue[r], startTime);
+                            var bonus = calculateBonus(avgsleep);
+                            var dynprio = Math.max(100, Math.min(parseInt(readyQueue[r].startprio)-bonus+5, 139));
+                            readyQueue[r].currentprio = parseInt(dynprio);
+                            processdata[parseInt(readyQueue[r].number-1)]= readyQueue[r];
+                        }
+                        //Find process with lowest priority
+                        var lowestIndex = parseInt(findLowestPriority(readyQueue));
+                        next = readyQueue[lowestIndex];
+                        otherinfo = processdataToHTML(algo, next.number);
+                        //Remove next process from ready queue
+                        readyQueue.splice(parseInt(lowestIndex),1);
+                        //Get time slice length
+                        zeitscheibe = parseInt(next.quantum);
+                    }
+                    else if(algo == "Custom"){
+                        for(r=0; r<readyQueue.length; r++){
+                            if(document.getElementById('accountCheck').checked){
+                                //Replace placeholder letters in account value equation
+                                var accountstring = replaceGeneral(document.getElementById('equationAccount').value, readyQueue[r], startTime);
+                                //Calculate account value
+                                var account = parseInt(math.evaluate(accountstring));
+                                readyQueue[r].account = account;
+                            }
+                            //Replace placeholder letters in priority equation
+                            var priostring = replaceGeneral(document.getElementById('equationPrio').value, readyQueue[r], startTime);
+                            //Calculate priority
+                            var dynprio = parseInt(math.evaluate(priostring));
+                            readyQueue[r].currentprio = dynprio;
+                            //Checks if calculation of time slice length is activated
+                            if(document.getElementById('quantumCheck').checked){
+                                //Replaces placeholder letters in time slice equation
+                                var quantumstring = replaceGeneral(document.getElementById('equationQuantum').value, readyQueue[r], startTime);
+                                //Calculate result
+                                var quantum = parseInt(math.evaluate(quantumstring));
+                                //Refresh time slice length
+                                readyQueue[r].quantum = quantum;
+                            }
+                            //Refresh information in processdata
+                            processdata[parseInt(readyQueue[r].number-1)]= readyQueue[r];
+                        }
+                        //Find process with lowest priority
+                        var lowestIndex = parseInt(findLowestPriority(readyQueue));
+                        next = readyQueue[lowestIndex];
+                        otherinfo = processdataToHTML(algo, next.number);
+                        //Remove next process from readyQueue
+                        readyQueue.splice(parseInt(lowestIndex),1);
+                        //Refresh time slice length
+                        if(document.getElementById('quantumCheck').checked){
+                            zeitscheibe = parseInt(next.quantum);
+                        }
+                    }
+                    //Calculate end of current time slice and refresh remaining runtime of process
+                    var endTime;
+                    if(parseInt(next.remainingtime) > parseInt(zeitscheibe)){
+                        endTime = parseInt(startTime)+parseInt(zeitscheibe);
+                        next.remainingtime = parseInt(next.remainingtime) - parseInt(zeitscheibe);
+                    }
+                    else {
+                        endTime = parseInt(startTime)+parseInt(next.remainingtime);
+                        next.remainingtime = 0;
+                        processesLeft = processesLeft-1;
+                    }
+                    var newSt = {startTime: startTime, endTime: endTime, name: 'Prozess ' + next.number, number: next.number};
+                    newSt.rqinfo = rqinfo;
+                    newSt.otherinfo = otherinfo;
+                    //Add step to steps
+                    steps.push(newSt);
+                    //Refresh information for next process in processdata
+                    processdata[parseInt(next.number-1)] = next;
+                    //Current time is now end of interval
+                    startTime = endTime;
+                    //Make sure that processes are sorted by startTime in RoundRobin because only with that alrogithm the order is relevant
+                    if(algo=="Round Robin"){
+                        processdata.sort(function(a, b){return parseInt(a.start)-parseInt(b.start)});
+                    }
+                    //Add processes to readyQueue that have started since start of last time slice
+                    for(r = 0; r<processdata.length; r++){
+                        if(parseInt(processdata[r].start) <= startTime && parseInt(processdata[r].remainingtime) > 0 && !containsPro(readyQueue, processdata[r].number) && processdata[r].number != next.number){
+                            readyQueue.push(processdata[r]);
+                        }
+                    }
+                    //If process has remainingTime, add it to readyQueue again
+                    //Happens here and not further up so the right process order for round robin exists
+                    if(parseInt(next.remainingtime)!= 0){
+                        readyQueue.push(next);
+                    }
+                    //Sort processes back in former order so everything else keeps working properly
+                    if(algo=="Round Robin"){
+                        processdata.sort(function(a, b){return parseInt(a.number)-parseInt(b.number)});
+                    }
+                    //Checks if processes are left in readyQueue
+                    //If not, check if there are processes with a later start than current time
+                    if(readyQueue.length==0 && checkForLaterProcess(startTime)){
+                        startTime = findNextStart(startTime);
+                        //Processes that have started since start of time slice to readyQueue
+                        for(r = 0; r<processdata.length; r++){
+                            if(parseInt(processdata[r].start) <= startTime && parseInt(processdata[r].remainingtime) > 0 && !containsPro(readyQueue, processdata[r].number) && processdata[r].number != next.number){
+                                readyQueue.push(processdata[r]);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+        </script>
+        <noscript>
+            JavaScript has to be activated for the application to work!
+        </noscript>
+    </head>
+    <body>   
+
+        <div id="options" class="sidemenu">
+            <div class="form-group">
+                <label for="algo">Algorithm:</label>
+                <form class="selform" onchange="refreshPro()" onsubmit="return false">
+                    <select id ="algo" name="algo" class="custom-select custom-select-sm custom-sel">
+                        <option class="opt" value="Round Robin" selected>Round Robin</option>
+                        <option class="opt" value="Shortest Remaining Job First">Shortest Remaining Job First</option>
+                        <option class="opt" value="Accountsystem">Accountsystem</option>
+                        <option class="opt" value="Linuxscheduler">Linuxscheduler</option>
+                        <option class="opt" value="Custom">Custom</option>
+                    </select>
+                </form> 
+            </div>
+            <div id="customwrapper">
+            </div>
+            <div id="quantumwrapper">
+                <form onsubmit="return false">
+                    <div class="form-group">
+                        <div class="form-inline">
+                            <label for="timespan"  class="mr-sm-2">Length of time slice:</label>
+                            <input type="text" class="form-control form-control-sm mr-sm-2" id="timespan" onchange="validateTimespan()">
+                            <div class="val" id="timespanval"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <form onsubmit="return false">
+                <div class="form-group" id="prozesszahl">
+                    <div class = "form-inline">
+                        <label for="proamount" class="mr-sm-2">Amount of processes:</label>
+                        <input type="text" class="form-control form-control-sm mr-sm-2" id="proamount" onsubmit="return false" onchange="refreshProcesses(0)">
+                        <div class="val" id="proamountval"></div>
+                    </div>
+                </div>
+            </form>
+            <div id="psettings"></div>
+            <div class="menuthing"><div class="val" id="waitpls"></div><br><button type="button" class="btn btn-secondary" onclick="updateProcesses()" id="simbutton">Start simulation</button></div>
+            <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+        </div>
+
+        <div id="main" class="container-fluid">
+            <h1>CPU-Scheduling-Simulator</h1>
+            <div class="wrapper">
+                <div id="buttons" class="buttons">
+                    <p>
+                        <button type="button" class="btn btn-secondary" onclick="openMenu()" id="settingButton">Settings</button>
+                        <button type="button" class="btn btn-secondary col-xs-2" id="firstbutton" onclick="backToStep(myChart,0)" disabled>First step</button>
+                        <button type="button" class="btn btn-secondary col-xs-2" id="previousbutton" onclick="backToStep(myChart,currentStep-1)" disabled>Back</button>
+                        <button type="button" class="btn btn-secondary col-xs-2" id="nextbutton" onclick="goToStep(myChart,currentStep+1)" disabled>Next</button>
+                        <button id="lastbutton" type="button" class="btn btn-secondary col-xs-2" onclick="goToStep(myChart,steps.length-1)" disabled>Last step</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="downloadDiagram()" id="downloaddia">&#x2B73; Download</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="playAnimation()" id="aniButton">Play animation</button>
+                    </p>
+                </div>
+
+                <div id="currentStep" class="currentStep"></div>
+            </div>
+            <div class="wrapper">  
+                <div class="diagramm" style="overflow-x:scroll">
+                    <canvas id="myChart" width="3000px" height="300px"></canvas>
+                </div>
+                <div class="infodiv">
+                    <div id="rqinfo"></div>
+                    <div id="allinfo"></div>
+                </div>
+            </div>
+            <div class="disclaimer">
+                <p><b>DISCLAIMER:</b></p>
+                <p>1. The purpose of this application is to show the behavior of different process-scheduling-algorithms for teaching purposes. It can contain small inaccuracies due to calculations and is not 100% mathematically correct.</p>
+                <p>2. The information tables to the right of the diagram always show the state at the start of the currently chosen step, before any process is chosen, removed from the readyQueue and the duration of the current time slice has been removed from the remaining runtime. The diagram always shows the state at the end of the currently chosen step.</p>
+                <p>3. To use this application, JavaScript needs to be activated in the browser and an internet connection needs to be present, so diagram and math library can be used.</p>
+                <p>4. The state of the application can only be saved and restored at the next use if saving of data in the browser is activated and features like the incognito-mode or similar are deactivated.</p>
+                <p>5. If the custom-algorithm is chosen and an equation gets put in, that results in an endless loop during calculation of the simulation steps, the simulation can be cancelled by refreshing the page. The last correctly calculated diagram will be shown.</p>
+                <p>Copyright (c) 2020 Rachel Ringe</p>
+            </div>
+            <script>
+                //Boolean that determines if an animation is currently being played
+                var animation = false;
+                //Array containing all animation timeouts
+                var allAnimations = [];
+                //Array containing all processdata
+                var processdata = [];
+                //Array containing all simulation steps
+                var steps = [];
+                //Current step
+                var currentStep;
+                //Datasets currently drawn into the diagram
+                var datasets = [];
+                //Options for drawing of diagram
+                var options = options = {
+                    //Dont show animations in diagram
+                    animation: false,
+                    responsive: false,
+                    //Dont automatically resize
+                    maintainAspectRatio: false,
+                    //Padding at border
+                    layout: {
+                        padding: {
+                            left: 5,
+                            right: 5,
+                            top: 5,
+                            bottom: 5
+                        }
+                    },
+                    //Deactivate tooltip
+                    tooltips: {
+                        enabled: false
+                    },
+                    //No legend
+                    legend: {
+                        display: false
+                    },
+                    //Settings for axes
+                    scales: {
+                        xAxes: [{
+                            type: 'linear',
+                            position: 'bottom',
+                            ticks: {
+                                stepSize: 10,
+                                max: 400,
+                                min: 0
+                            }
+
+                        }],
+                        yAxes: [{
+                            type: 'category',
+                            labels: [' ', 'CPU', '   '],
+                            ticks: {
+                                beginAtzero: false,
+                                min: ' '
+                            },
+                            scaleLabel: {
+                                display: false
+                            },
+                            gridLines: {
+                                display: true,
+                                offsetGridLines: true
+                            }
+                        }]
+                    }
+                };
+
+                //Array with 10 colors for processes
+                var colors = ['#eb3b5a', '#fa8231', '#f7b731', '#20bf6b', '#2d98da', '#3867d6', '#8854d0', '#dd65c8', '#a5b1c2', '#4b6584'];
+                //Checks if application is opened the first time
+                if(!localStorage.getItem('firstTime')) {
+                    //Draw empty diagram and reset menu to prevent old inputs in forms that could make faulty inputs possible
+                    document.getElementById('aniButton').setAttribute("disabled",true);
+                    var ctx = document.getElementById('myChart');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: datasets},
+                        options: options
+                    });
+                    resetMenuToStart();
+                } else {
+                    //Get diagramm values from browser storage
+                    processdata = JSON.parse(localStorage.getItem('processdata'));
+                    steps = JSON.parse(localStorage.getItem('steps'));
+                    currentStep = 0;
+                    //Restore diagram
+                    var thischart = resizeChart(null);
+                    //Return to previously chosen step
+                    goToStep(thischart,localStorage.getItem('currentStep'));
+                    //Reset menu
+                    resetMenuToStart();
+                }
+
+                //Resets menu to starting state to prevent faulty inputs
+                function resetMenuToStart(){
+                    document.getElementById("options").innerHTML = "<div class=\"form-group\"><label for=\"algo\">Algorithm</label><form class=\"selform\" onchange=\"refreshPro()\" onsubmit=\"return false\"><select id =\"algo\" name=\"algo\" class=\"custom-select custom-select-sm custom-sel\"><option class=\"opt\" value=\"Round Robin\" selected>Round Robin</option><option class=\"opt\" value=\"Shortest Remaining Job First\">Shortest Remaining Job First</option><option class=\"opt\" value=\"Accountsystem\">Accountsystem</option><option class=\"opt\" value=\"Linuxscheduler\">Linuxscheduler</option><option class=\"opt\" value=\"Custom\">Custom</option></select></form> </div><div id=\"customwrapper\"></div><div id=\"quantumwrapper\"><form onsubmit=\"return false\"><div class=\"form-group\"><div class=\"form-inline\"><label for=\"timespan\"  class=\"mr-sm-2\">Length of time slice:</label><input type=\"text\" class=\"form-control form-control-sm mr-sm-2\" id=\"timespan\" onchange=\"validateTimespan()\"><div class=\"val\" id=\"timespanval\"></div></div></div></form></div><form onsubmit=\"return false\"><div class=\"form-group\" id=\"prozesszahl\"><div class = \"form-inline\"><label for=\"proamount\" class=\"mr-sm-2\">Amount of processes:</label><input type=\"text\" class=\"form-control form-control-sm mr-sm-2\" id=\"proamount\" onsubmit=\"return false\" onchange=\"refreshProcesses(0)\"><div class=\"val\" id=\"proamountval\"></div></div></div></form><div id=\"psettings\"></div><div class=\"menuthing\"><div class=\"val\" id=\"waitpls\"></div><br><button type=\"button\" class=\"btn btn-secondary\" onclick=\"updateProcesses()\" id=\"simbutton\">Start simulation</button></div><a href=\"javascript:void(0)\" class=\"closebtn\" onclick=\"closeMenu()\">&times;</a>";
+                }
+
+
+                //Deactivates next and last step buttons, activates back and first step buttons
+                function removeNextButtons(){
+                    document.getElementById('nextbutton').setAttribute("disabled", true);
+                    document.getElementById('lastbutton').setAttribute("disabled", true);
+                    document.getElementById('firstbutton').removeAttribute("disabled");
+                    document.getElementById('previousbutton').removeAttribute("disabled");
+                }
+
+                //Deactivates back and first step buttons, activates next and last step buttons
+                function removePreviousButtons(){
+                    document.getElementById('firstbutton').setAttribute("disabled", true);
+                    document.getElementById('previousbutton').setAttribute("disabled", true);
+                    document.getElementById('nextbutton').removeAttribute("disabled");
+                    document.getElementById('lastbutton').removeAttribute("disabled");
+                }
+
+                //Activates all buttons except for settins button
+                function showAllButtons(){
+                    document.getElementById('nextbutton').removeAttribute("disabled");
+                    document.getElementById('lastbutton').removeAttribute("disabled");
+                    document.getElementById('firstbutton').removeAttribute("disabled");
+                    document.getElementById('previousbutton').removeAttribute("disabled");
+                    document.getElementById('aniButton').removeAttribute("disabled");
+                }
+
+                //Deactivates all buttons except for animation and settings button
+                function disableAllButtons(){
+                    document.getElementById('firstbutton').setAttribute("disabled", true);
+                    document.getElementById('previousbutton').setAttribute("disabled", true);
+                    document.getElementById('nextbutton').setAttribute("disabled", true);
+                    document.getElementById('lastbutton').setAttribute("disabled", true);
+                }
+
+                //Opens download window to download current canvas as png
+                //Öffnet ein Download-Fenster um das aktuelle Canvas als PNG herunterzuladen
+                function downloadDiagram(){
+                    var diagramCanvas = document.getElementById("myChart");
+                    //Puts in a white background because diagram cant be read well with standard transparent background
+                    var ctx = diagramCanvas.getContext("2d");
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, diagramCanvas.width, diagramCanvas.height);
+                    //Makes downloadlink for png
+                    var pngdiagram = diagramCanvas.toDataURL("image/png", 1.0).replace("image/png", "image/octet-stream");
+                    var downloadlink = document.createElement('a');
+                    downloadlink.download = "scheduler.png";
+                    downloadlink.href = pngdiagram;
+                    //Opens download window
+                    downloadlink.click();
+                }
+
+
+                //Refreshed display next to diagram
+                function updateDisplay(currentStep, start, end, rqinfo, otherinfo){
+                    document.getElementById('curStep').innerHTML = parseInt(currentStep)+1;
+                    document.getElementById('curTime1').innerHTML = start;
+                    document.getElementById('curTime2').innerHTML = end;
+                    document.getElementById('rqinfo').innerHTML = rqinfo;
+                    document.getElementById('allinfo').innerHTML = otherinfo;
+                    if(!animation){
+                        if(parseInt(currentStep) == 0){
+                            removePreviousButtons();
+                            document.getElementById('aniButton').removeAttribute("disabled");
+                        } else if(parseInt(currentStep) == steps.length-1){
+                            removeNextButtons();
+                            document.getElementById('aniButton').setAttribute("disabled",true);
+                        } else {
+                            showAllButtons();
+                        }
+                    }
+                }
+
+                //Plays animation
+                function playAnimation(){
+                    //Checks if last step is already being displayed
+                    if(parseInt(currentStep) != steps.length-1){
+                        animation = true;
+                        //Deactivated all buttons
+                        disableAllButtons();
+                        document.getElementById('settingButton').setAttribute("disabled", true);
+                        //Adjusts animation button
+                        document.getElementById('aniButton').innerHTML = "Stop animation";
+                        document.getElementById('aniButton').setAttribute("onclick", "stopAnimation()");
+                        //Sets Timeout for every step to last step and adds them to allAnimations
+                        var r;
+                        var counter = 1;
+                        for(r=parseInt(currentStep); r<steps.length-1; r++){
+                            function timeOutAnimation(delay){
+                                var newTimeout = setTimeout(function(){goToStep(myChart,currentStep+1)}, delay);
+                                allAnimations.push(newTimeout);
+                            }
+                            //Timeouts need to be staggered because loop doesnt wait for timeouts
+                            //If a static number was used, every step would be shown in the diagram at the same time
+                            timeOutAnimation(1000*counter);
+                            counter++;
+                        }
+                        //Sets timeout to reactivate all buttons after animation is done
+                        var secondTimeout = setTimeout(showAllButtons, 1000*counter);
+                        allAnimations.push(secondTimeout);
+                        secondTimeout = setTimeout(function setAnimation(){animation = false}, 1000*counter);
+                        allAnimations.push(secondTimeout);
+                        secondTimeout = setTimeout(function setButton(){document.getElementById('settingButton').removeAttribute("disabled");}, 1000*counter);
+                        allAnimations.push(secondTimeout);
+                        secondTimeout = setTimeout(function deactivateButton(){document.getElementById('aniButton').setAttribute("disabled", true);}, 1000*counter);
+                        allAnimations.push(secondTimeout);
+                        secondTimeout= setTimeout(resetAnimationButton, 1000*counter);
+                        allAnimations.push(secondTimeout);
+                    }
+                }
+
+                //Resets animation button to starting state
+                function resetAnimationButton(){
+                    document.getElementById('aniButton').innerHTML = "Play animation";
+                    document.getElementById('aniButton').setAttribute("onclick", "playAnimation()");
+                }
+
+                //Cancels all remaining timeouts in allAnimations and resets buttons
+                function stopAnimation(){
+                    var r;
+                    for(r = 0; r<allAnimations.length; r++){
+                        clearTimeout(allAnimations[r]);
+                    }
+                    resetAnimationButton();
+                    showAllButtons();
+                    document.getElementById('settingButton').removeAttribute("disabled");
+                }
+
+
+                //Returns to certain step
+                //chart: Diagram that gets edited
+                //stepnum: Step that you want to return to
+                function backToStep(chart, stepnum){
+                    if(stepnum == 0){
+                        chart.data.datasets = [];
+                        var st = createStep(steps[0]);
+                        chart.data.datasets.push(st[0]);
+                        chart.data.datasets.push(st[1]);
+                        chart.update();
+                    } else {
+                        var r;
+                        for(r = currentStep; r>parseInt(stepnum); r--){
+                            chart.data.datasets.pop();
+                            chart.data.datasets.pop();
+                            chart.update();
+                        }
+                    }
+                    currentStep = parseInt(stepnum);
+                    localStorage.setItem('currentStep', currentStep);
+                    updateDisplay(currentStep, steps[parseInt(currentStep)].startTime, steps[parseInt(currentStep)].endTime, steps[currentStep].rqinfo, steps[currentStep].otherinfo);
+                }
+
+                //Go forward to certain step
+                //chart: Diagram that gets edited
+                //stepnum: Step you want to go to
+                function goToStep(chart, stepnum){
+                    var r;
+                    for(r = currentStep+1; r<=parseInt(stepnum); r++){
+                        var st = createStep(steps[parseInt(r)]);
+                        chart.data.datasets.push(st[0]);
+                        chart.data.datasets.push(st[1]);
+                    }
+                    currentStep = parseInt(stepnum);
+                    localStorage.setItem('currentStep', currentStep);
+                    chart.update();
+                    updateDisplay(currentStep, steps[parseInt(currentStep)].startTime, steps[parseInt(currentStep)].endTime, steps[currentStep].rqinfo, steps[currentStep].otherinfo);
+                }
+
+                //Creates array with all necessary axes labels for diagram including placeholders for correct formatting
+                //@return Array that contains all axes labels
+                function produceLabels(){
+                    var labels = [' ', 'CPU'];
+                    var r;
+                    for(r=1; r<=processdata.length; r++){
+                        labels.push('P'+r);
+                    };
+                    labels.push('   ');
+                    return labels;
+                }
+
+                //Finds shortest interval in steps and returns its length
+                //@return Length of shortest step in steps
+                function calcShortestInterval(){
+                    var shortestInt = parseInt(steps[0].endTime)-parseInt(steps[0].startTime);
+                    var r;
+                    for(r=0;r<steps.length;r++){
+                        if(parseInt(steps[r].endTime)-parseInt(steps[r].startTime) < shortestInt){
+                            shortestInt = parseInt(steps[r].endTime)-parseInt(steps[r].startTime);
+                        }
+                    }
+                    return shortestInt;
+                }
+
+                //Calculates diagram width
+                //algotype: Algorithm name as string
+                //@return diagram width
+                function calcCanvasWidth(algotype){
+                    var wid;
+                    if(algotype != "Shortest Remaining Job First"){
+                        wid = steps.length * 50;}
+                    else {
+                        wid = (parseInt(steps[steps.length-1].endTime)/calcShortestInterval())*50;
+                    }
+                    if(wid < 150){
+                        wid = 150;
+                    }
+                    if(wid > 10000){
+                        wid = 10000;
+                    }
+                    return wid;
+                }
+
+                //Calculate diagram height
+                //@return diagram height
+                function calcCanvasHeight(){
+                    var hei = processdata.length*60;
+                    if(hei <250){
+                        hei = 250;
+                    }
+                    return hei;
+                }
+
+                //Calculated line width according to amount of processes
+                //@return line width
+                function calcBordwid(){
+                    var bordwid;
+                    if(processdata.length > 7){
+                        bordwid = processdata.length*4;
+                    }
+                    else if(processdata.length > 5){
+                        bordwid = processdata.length*5;
+                    }
+                    else if(processdata.length > 3){
+                        bordwid = 30
+                    }
+                    else{
+                        bordwid = 40;
+                    }  
+                    return bordwid;
+                }
+
+                //Converts step to dataset for diagram
+                //step: step object with start, end and id of process
+                //@return Array with two datasets for CPU and process line
+                function createStep(step){
+                    var newStep = [{label: step.name,
+                                    backgroundColor: colors[parseInt(step.number)-1],
+                                    borderColor: colors[parseInt(step.number)-1],
+                                    fill: false,
+                                    borderWidth: calcBordwid(),
+                                    pointRadius: 1,
+                                    pointStyle: 'line',
+                                    pointBorderColor: '#000000',
+                                    pointBackgroundColor: '#000000',
+                                    data: [{
+                                        x: parseInt(step.startTime),
+                                        y: parseInt(step.number)+1
+                                    }, {
+                                        x: parseInt(step.endTime),
+                                        y: parseInt(step.number)+1
+                                    }]
+                                   },{
+                                       label: step.name,
+                                       backgroundColor: colors[parseInt(step.number)-1],
+                                       borderColor: colors[parseInt(step.number)-1],
+                                       fill: false,
+                                       borderWidth: calcBordwid(),
+                                       pointRadius: 0,
+                                       pointRadius: 1,
+                                       pointStyle: 'line',
+                                       pointBorderColor: '#000000',
+                                       pointBackgroundColor: '#000000',
+                                       data: [{
+                                           x: parseInt(step.startTime),
+                                           y: 1
+                                       }, {
+                                           x: parseInt(step.endTime),
+                                           y: 1
+                                       }]
+                                   }];
+                    return newStep;
+
+                }
+
+
+                //Destroys old diagram, refreshes canvas size, makes new diagram and draws fist step
+                //chart: old diagram
+                //@return new diagram
+                function resizeChart(chart){
+                    var algotype;
+                    var zeitscheibe;
+                    //if chart is null old diagram gets restored otherwise a new one is drawn
+                    if(chart){
+                        currentStep = 0;
+                        localStorage.setItem('currentStep','0');
+                        //Destroys old diagram
+                        chart.destroy();
+                        algotype = document.getElementById('algo').value;
+                        if(algotype == "Round Robin" || algotype == "Accountsystem" || (algotype == "Custom" && !document.getElementById('quantumCheck').checked)){
+                            zeitscheibe = document.getElementById('timespan').value;
+                        } else {
+                            zeitscheibe = calcShortestInterval();
+                        }
+                        //time slice is used as scale for x-axis and gets saved to be able to restore the diagram later
+                        localStorage.setItem('zeitscheibe', zeitscheibe);
+                    }
+                    else {
+                        //Data for old diagram gets pulled from storage
+                        algotype = localStorage.getItem('algotype');
+                        zeitscheibe = localStorage.getItem('zeitscheibe');
+                    }
+                    //Determines scales and labels for axes
+                    options.scales.xAxes[0].ticks.stepSize = zeitscheibe;
+                    options.scales.yAxes[0].labels = produceLabels();
+                    options.scales.xAxes[0].ticks.min = steps[0].startTime;
+                    options.scales.xAxes[0].ticks.max = steps[steps.length-1].endTime;
+                    var ctx = document.getElementById("myChart").getContext("2d");
+                    //Calculates canvas height and width
+                    ctx.canvas.width = calcCanvasWidth(algotype);
+                    ctx.canvas.height = calcCanvasHeight();
+                    datasets.length = 0;
+                    //Draws first step into diagram
+                    var st = createStep(steps[parseInt(currentStep)]);
+                    datasets.push(st[0]);
+                    datasets.push(st[1]);
+                    myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            datasets: datasets},
+                        options: options
+                    });
+                    document.getElementById('currentStep').innerHTML = "<p><b>Current step: </b><span type=\"text\" id=\"curStep\"></span><br><b>Current interval: </b><span type=\"text\" id=\"curTime1\"></span> - <span type=\"text\" id=\"curTime2\"></span></p>";
+                    updateDisplay(currentStep, steps[parseInt(currentStep)].startTime, steps[parseInt(currentStep)].endTime, steps[currentStep].rqinfo, steps[currentStep].otherinfo);
+                    removePreviousButtons();
+                    return myChart;
+                }
+
+            </script> 
+
+        </div>    
+    </body>
+</html>
